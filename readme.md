@@ -21,4 +21,4 @@ heroku open --app lapfinder
 
 ```
 
-App link http://lapfinder.herokuapp.com/
+You can find a demo [here](https://lapfinder.herokuapp.com/)
