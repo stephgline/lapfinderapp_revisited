@@ -74,6 +74,18 @@ def get_schedule():
         
 #a function to retrieve the lat and lon of a pool that handles weird query limit errors
 #todo fix to handle incorrect addresses so doesn't enter infinite loop
+# def get_coord(startaddress, counter):
+#     NoneType = type(None)
+#     sleep(1)
+#     g = geocoder.google(startaddress)
+
+#     g = g.latlng
+
+#     if type(g) == NoneType:
+#         print(counter)
+#         if counter < 5:
+#             counter += 1
+#             get_coord(startaddress, counter)
 def get_coord(startaddress):
     NoneType = type(None)
     sleep(1)
@@ -85,6 +97,7 @@ def get_coord(startaddress):
         get_coord(startaddress)
     else:     
         return g 
+
 def get_laphours(laphours):
     if laphours == '':
     	return 'There are no lap hours today.'
@@ -96,9 +109,9 @@ def addresscoord(startaddress):
     poolsched = pickle.load( open("app/static/poolscheduledf.p", "rb" ) )
     poolsdf = pickle.load(open("app/static/poolsdf.p", "rb"))
     
+    #five tries
     coord = get_coord(startaddress)
-    if coord == None:
-        coord = get_coord(startaddress)
+
     
     localmin = 0
     mindict = {}
@@ -146,43 +159,22 @@ def addresscoord(startaddress):
 
 
 
-#TODO: fix to handle entering a pool directly
-# def directpool(poolchoice):
-#     closepool = poolchoice
-#     os.environ['TZ'] = 'EST+05EDT,M4.1.0,M10.5.0'
-#     time.tzset()
-#     now = time.strftime("%A")
-#     con = mdb.connect('localhost', 'root', '', 'lap_schedule')
-#     poolhoursplace = pd.read_sql('SELECT p.Pool, a.address, p.%s FROM lap_schedule_table5 AS p JOIN pool_table6 AS a ON p.Pool = a.swimming_pool WHERE Pool = "%s"' %(now, closepool) , con)
-#     pooladdress = poolhoursplace['address'].iloc[0]
-#     laplist = poolhoursplace.ix[:, 2:].values.tolist()
-#     laphours = []
-#     for i in laplist:
-#         if i[0] == 'None':
-#             continue
-#         else:
-#             laphours.append(i[0])
-            
-#     if laphours == []:
-#         laphours.append('There are no lap hours today')
+def directpool(poolchoice):
+    closepool = poolchoice
+    today = time.strftime("%A %D")
+    day = time.strftime("%A")
+    poolsched = pickle.load( open("app/static/poolscheduledf.p", "rb" ) )
+    poolsdf = pickle.load(open("app/static/poolsdf.p", "rb"))
+    pooladdress =  list(poolsdf[poolsdf['swimming_pool']==closepool]['address'])[0]
+    laphours = ", ".join(list(poolsched[(poolsched['pool']==closepool) & (poolsched[day]!= 'None')][day]))
 
-#     laphours = ", ".join(laphours)
-
-
-#     today = time.strftime("%A %D")
-#     poolswebsdict = pickle.load(open("app/static/poolsandwebsites.p", "rb"))
-#     website = poolswebsdict[closepool]
-
-#     cur = con.cursor()
-#     cur.execute('SELECT Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday FROM  lap_schedule_table5 WHERE Pool = "%s";' %(closepool))
-#     query_results = cur.fetchall()
-#     hours = []
-#     for result in query_results:
-#         hours.append(dict(Monday=result[0], Tuesday=result[1], Wednesday=result[2], Thursday=result[3], Friday=result[4],Saturday=result[5], Sunday=result[6]))
-
-#     indoordimdict = pickle.load(open("app/static/indoordimdict.p", "rb"))
-#     dimensions = indoordimdict[closepool]
-#     return closepool, pooladdress, laphours, today, website, hours, dimensions
+    website = list(poolsdf[poolsdf['swimming_pool']==closepool]['website_source'])[0]
+    hours = poolsched[poolsched['pool'] == closepool][['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']]
+   
+    #get dimensions for pool
+    indoordim = pickle.load(open("app/static/poolsdimensions.p", "rb"))
+    dimensions = list(indoordim[indoordim['pool']==closepool]['dimensions'])[0]
+    return closepool, pooladdress, laphours, today, website, hours, dimensions
 
 
 
@@ -207,19 +199,19 @@ def lapfinder():
 
 @app.route('/lapfinderoutput')
 def lapfinderoutput():
-	# try:
-	startaddress = request.args.get('LFID')
-	closepool, pooladdress, laphours, today, website,  dimensions, hours = addresscoord(startaddress)
+    startaddress = request.args.get('LFID')
+    if len(startaddress)>0:
+        closepool, pooladdress, laphours, today, website,  dimensions, hours = addresscoord(startaddress)
+        return render_template("lapfinderoutput.html", closepool=closepool, pooladdress=pooladdress, laphours =laphours, today=today, website=website,  dimensions=dimensions, tables=[hours.to_html()])
 
-	return render_template("lapfinderoutput.html", closepool=closepool, pooladdress=pooladdress, laphours =laphours, today=today, website=website,  dimensions=dimensions, tables=[hours.to_html()])
-	# except:
-	# 	poolchoice = request.args.get('pool')
-	# 	if poolchoice == 'None':
-	# 		return render_template("lapfinderindexnone.html")
-	# 	else:
-	# 		closepool, pooladdress, laphours, today, website, hours, dimensions = lapfinder.directpool(poolchoice)
-		
-	# 		return render_template("lapfinderdirectoutput.html", closepool=closepool, pooladdress=pooladdress, laphours =laphours, today=today, website=website, hours = hours, dimensions=dimensions)
+    else:
+        poolchoice = request.args.get('pool')
+        if poolchoice == 'None':
+            return render_template("lapfinderindexnone.html")
+        else:
+            closepool, pooladdress, laphours, today, website, hours, dimensions = directpool(poolchoice)
+            return render_template("lapfinderdirectoutput.html", closepool=closepool, pooladdress=pooladdress, laphours =laphours, today=today, website=website, tables=[hours.to_html()], dimensions=dimensions)
+
 
 
 

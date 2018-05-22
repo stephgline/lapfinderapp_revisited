@@ -160,7 +160,7 @@
                           <option value="Brownsville" class="pool"  id="pool" name="pool">Brownsville</option>
                           <option value="Chelsea" class="pool"  id="pool" name="pool">Chelsea</option>
                           <option value="Flushing Meadows Corona Park" class="pool"  id="pool" name="pool">Flushing Meadows Corona Park</option>
-                          <option value="Gertrude Eredel" class="pool"  id="pool" name="pool">Gertrude Eredel</option>
+                          <option value="Gertrude Ederle" class="pool"  id="pool" name="pool">Gertrude Ederle</option>
                           <option value="Hansborough" class="pool"  id="pool" name="pool">Hansborough</option>
                           <option value="Metropolitan" class="pool"  id="pool" name="pool">Metropolitan</option>
                           <option value="St. Johns" class="pool"  id="pool" name="pool">St. Johns</option>
@@ -212,15 +212,20 @@
           </div>
       </section>
 
-      <div class="container">
-        <table class="table table-hover">
-        <tr><th>Monday</th><th> Tuesday</th><th> Wednesday </th><th> Thursday</th><th> Friday</th><th> Saturday</th><th> Sunday</th></tr>
-         {% for pool in hours %}
-        <tr><td>{{ pool['Monday'] }}</td><td>{{ pool['Tuesday']}}</td><td> {{ pool['Wednesday'] }}</td><td>{{ pool['Thursday']}}</td><td>{{ pool['Friday']}}</td><td>{{ pool['Saturday']}}</td><td>{{ pool['Sunday']}}</td></tr>
-          {% endfor %}
-          </table>
+      <section id="lapfinderoutput" class="content-section text-center">
+        <div class="output-section">
+          <div class="container">
+            <div class="col-lg-8 col-lg-offset-2">
+              <h2>Lap schedule for the week at {{closepool}} pool. </h2>
 
-      </div>
+              {% for table in tables %}
+             
+                {{ table|safe }}
+              {% endfor %}
+              </div>
+            </div>
+          </div>
+      </section>
       
   
 
