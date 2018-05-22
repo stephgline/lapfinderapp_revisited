@@ -1,3 +1,6 @@
+Lapfinder scrapes NYC recreation center websites and helps you find the lap hours at the rec center closest to you!
+
+
 #how to run
 ```
 docker build -t lapfinder
@@ -17,3 +20,5 @@ heroku container:push web
 heroku open --app lapfinder
 
 ```
+
+App link http://lapfinder.herokuapp.com/
