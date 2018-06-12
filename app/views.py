@@ -14,7 +14,6 @@ from time import sleep
 
 
 #this function scrapes the rec center websites for up to date lap hours
-#should be run ~once a week (1xday?) to ensure correct schedules
 def get_schedule():
     days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     pools = pickle.load(open("poolsdf.p", "rb"))
@@ -103,8 +102,7 @@ def get_laphours(laphours):
     	return 'There are no lap hours today.'
     else:
     	return laphours   
-#TODO: add in pool dimensions
-#TODO: add in direct pool
+
 def addresscoord(startaddress):
     poolsched = pickle.load( open("app/static/poolscheduledf.p", "rb" ) )
     poolsdf = pickle.load(open("app/static/poolsdf.p", "rb"))
@@ -140,14 +138,6 @@ def addresscoord(startaddress):
     today = time.strftime("%A %D")
     website = list(poolsdf[poolsdf['swimming_pool']==closepool]['website_source'])[0]
 
-    #cur = con.cursor()
-    #cur.execute('SELECT Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday FROM  lap_schedule_table5 WHERE Pool = "%s";' %(closepool))
-    #query_results = cur.fetchall()
-    #hours = []
-    #for result in query_results:
-    #hours.append(dict(Monday=result[0], Tuesday=result[1], Wednesday=result[2], Thursday=result[3], Friday=result[4],Saturday=result[5], Sunday=result[6]))
-    
-
     hours = poolsched[poolsched['pool'] == closepool][['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']]
    
     #get dimensions for pool
@@ -174,17 +164,10 @@ def directpool(poolchoice):
     #get dimensions for pool
     indoordim = pickle.load(open("app/static/poolsdimensions.p", "rb"))
     dimensions = list(indoordim[indoordim['pool']==closepool]['dimensions'])[0]
+    if laphours == '':
+        laphours = 'There are no laphours today.'
     return closepool, pooladdress, laphours, today, website, hours, dimensions
 
-
-
-
-
-
-
-# @app.route('/')
-# def annoisy():
-#     return render_template("input.html", title = 'Home')
 
 @app.route('/about')
 def about():
