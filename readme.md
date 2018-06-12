@@ -17,6 +17,8 @@ wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
 heroku container:login
 heroku create {project-name}
 heroku container:push web
+#new command
+heroku container:release web
 heroku open --app lapfinder
 
 ```
